@@ -1,0 +1,268 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 5,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg(sum by (instance, cpu) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", cluster=~\"development\"}[17s])))"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Usage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RequestUsage {cluster=\"development\", instance=\"grafana-prometheus-node-exporter:9100\", job=\"prometheus.scrape.cluster_targets\"}"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Container Request Usage"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LimitUsage {cluster=\"development\", instance=\"grafana-prometheus-node-exporter:9100\", job=\"prometheus.scrape.cluster_targets\"}"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Container Limit Usage"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "interval": "15s",
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "avg(sum by (instance, cpu) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", cluster=~\"$cluster\"}[$__rate_interval])))",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "CPU"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "count without(cpu, mode) (node_cpu_seconds_total{mode=\"idle\", cluster=\"development\"})",
+          "hide": true,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "Cores"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(kube_pod_container_resource_requests{resource=\"cpu\", cluster=~\"development\"})",
+          "hide": true,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "Requests"
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "($Requests / $Cores)",
+          "hide": false,
+          "refId": "RequestUsage",
+          "type": "math"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(kube_pod_container_resource_limits{resource=\"cpu\", cluster=~\"$cluster\"})",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "Limits"
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$Limits / $Cores",
+          "hide": false,
+          "refId": "LimitUsage",
+          "type": "math"
+        }
+      ],
+      "title": "Global CPU Metrics",
+      "type": "bargauge"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 40,
+  "tags": [
+    "mimir",
+    "kubernetes"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "Mimir",
+          "value": "mimir"
+        },
+        "description": "",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "development",
+          "value": "development"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(kube_node_info,cluster)",
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_node_info,cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Kubernetes",
+  "uid": "ceeclumhkw35sd",
+  "version": 11,
+  "weekStart": ""
+}
